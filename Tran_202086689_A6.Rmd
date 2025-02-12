@@ -1,0 +1,98 @@
+---
+title: "TRAN_20286689_A6"
+output: html_document
+date: "2025-02-11"
+---
+
+```{r}
+install.packages(c("doParallel", "parallel", "foreach"))
+```
+```{r}
+library(doParallel)
+
+```
+```{r}
+library(parallel)
+```
+```{r}
+library(foreach)
+```
+
+```{r}
+num_cores <- detectCores()
+```
+
+```{r}
+num_cores
+```
+
+```{r}
+
+start_time_serial <- Sys.time()
+```
+
+
+```{r}
+results_serial <- numeric(4000)
+for (i in 1:4000) {
+  results_serial[i] <- mean(rnorm(100000, mean = 10, sd = 3))
+}
+```
+
+```{r}
+end_time_serial <- Sys.time()
+```
+
+```{r}
+time_serial <- end_time_serial - start_time_serial
+time_serial
+```
+
+```{r}
+num_cores <- parallel::detectCores()
+```
+
+```{r}
+time_theoretical <- time_serial / num_cores
+```
+
+```{r}
+time_theoretical
+```
+
+```{r}
+Cores <- parallel::makeCluster(num_cores - 1)
+```
+
+```{r}
+doParallel::registerDoParallel(Cores)
+```
+
+```{r}
+start_time_parallel <- Sys.time()
+```
+
+```{r}
+results_parallel <- foreach(i = 1:4000, .combine = 'c') %dopar% {
+  mean(rnorm(100000, mean = 10, sd = 3))}
+```
+
+```{r}
+end_time_parallel <- Sys.time()
+```
+
+```{r}
+time_parallel <- end_time_parallel - start_time_parallel
+```
+
+```{r}
+time_parallel
+```
+
+The actual parallel execution time is 2.1946 secs, which significantly shorter than the serial execution time, which is 9.1399 secs, meaning that parallel processing improves performance. However, the actual parallel runtime is longer than the theoretical prediction is 1.1425 secs. This could due to initializing and managing multiple parallel threads introduces additional computational costs.
+
+
+
+
+
+
